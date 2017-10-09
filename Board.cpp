@@ -28,7 +28,7 @@ int Board::make_move(int column_index,int row_index,char color){
 		return -1;
 	}		
 	
-	board[column_index-1][row_index-1] = color;
+	board[row_index-1][column_index-1] = color;
 	return 1;
 }
 
