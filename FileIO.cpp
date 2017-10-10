@@ -21,9 +21,9 @@ string read_file(){
 	    {
 	      if(c == 1 || c == 2){
 		line2 += line;
-		cout <<"line2: "<< line2 << "line: "<<line << endl;
+		//cout <<"line2: "<< line2 << "line: "<<line << endl;
 		}
-	      cout << line << '\n';
+	      //cout << line << '\n';
 	      c++;
 	    }
 

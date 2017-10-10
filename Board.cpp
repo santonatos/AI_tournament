@@ -24,11 +24,13 @@ int Board::make_move(int column_index,int row_index,char color){
 	if(!Board::check_valid_color(color) ||  !Board::check_valid_position(column_index,row_index)){
 		return -1;
 	}
-	if(!Board::check_free_cell(column_index,row_index)){
+	/*if(!Board::check_free_cell(column_index-1,row_index-1)){
 		return -1;
-	}		
-	
-	board[row_index-1][column_index-1] = color;
+	}*/		
+	if(board[column_index-1][row_index-1] != 'e'){
+		fprintf(stdout,"[WARNING] this cell is already filled, but will be overwritten\n");
+	} 
+	board[column_index-1][row_index-1] = color;
 	return 1;
 }
 
@@ -41,19 +43,19 @@ void Board::print_board(){
 	cout << endl;
 	for(int i = 0;i < this->width;i++){
 		string space;
-		if(i < 10){
+		if(i +1 < 10){
 			space = string("  ");
 		}else{
 			space = string(" "); 
 		}
-		cout << i << space; 
+		cout << i + 1 << space; 
 		char p;
 
 
 		for(int j = 0;j < this->height;j++){
-			if(this->board[i][j] == 'e'){
+			if(this->board[j][i] == 'e'){
 				p = '_';
-			}else if(this->board[i][j] == 'w'){
+			}else if(this->board[j][i] == 'w'){
 				p = 'X';
 			}else{
 				p = 'O';
@@ -79,7 +81,7 @@ int Board::check_valid_color(char color){
 
 int Board::check_valid_position(int column_index,int row_index){
 	if(column_index > 15 || column_index < 1 || row_index > 15 || row_index < 1){
-		cout << "invalid position, out of board" << endl;
+		cout << "[WARNING] invalid position, out of board" << endl;
 		return 0;	
 
 	}
@@ -92,7 +94,7 @@ int Board::check_free_cell(int column_index,int row_index){
 		return 0;
 	}
 	if(this->board[column_index][row_index] != 'e'){
-		cout << "this cell is occupied by color: " << this->board[column_index][row_index] << endl;
+		cout << "[WARNING] this cell is occupied by color: " << this->board[column_index][row_index] << endl;
 		return 0;
 	}
 	return 1;

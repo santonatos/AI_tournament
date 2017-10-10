@@ -14,42 +14,48 @@ int main(int argc,char** argv){
 	printf("start\n");
 	int stay = 1;
 	Game gomoku = Game();
-	int start = 1;
+	int first_time = 1;
 	while(stay){
 		if(check_end()){
 			//EXIT LOOP, GAME
 			stay = 0;
+			continue;
 		}else if(check_turn(group_filename)){
-
-			//TODO next 3 lines
-			//gomoku.eval(gomoku.board)
-			//gomoku.make_move();
-			//write_file();
-
-		}else{
+			cout << "OUR Turn" << endl;
 			string move = read_file();
-			if(move.compare("") == 0 || move.compare(" ") == 0 || move.compare("\n") == 0){
+			//OUR FIRST MOVE
+			if((move.compare("") == 0 || move.compare(" ") == 0 || move.compare("\n") == 0) && first_time){
 				//we play first
 				gomoku.our_color = 'w';
 				gomoku.opponent_color = 'b';
-				//TODO gomoku.make_our_first_move();
-				start = 0;
+				gomoku.make_first_move(1,move);
+				first_time = 0;
 				continue;
-			}else if(start){
+			}else if(first_time){
 				//we play second
 				gomoku.our_color = 'b';
 				gomoku.opponent_color = 'w';
-				start = 0;
-				//TODO gomoku.make_our_first_move();
+				first_time = 0;
+				gomoku.make_first_move(2,move);
 				continue;
+			}else if((move.compare("") == 0 || move.compare(" ") == 0 || move.compare("\n") == 0) && !first_time){
+
+				fprintf(stdout,"[WARNING] why is the movefile empty again\n");
 			}
 
+			//OUR REGULAR TURN
 			gomoku.store_move(move);
 			gomoku.gameBoard.print_board();
 
-
+			//TODO 
+			//gomoku.make_next_move()
 
 		}
+
+
+
+
+		
 		//cout <<"turn: " << check_turn(group_filename) << endl;
 		//cout << "endgame file: " << check_end() << endl;
 	//read_file();
