@@ -2,19 +2,21 @@
 #define EVALUATION_HPP
 
 #include <queue>
-#include <time>
+#include <ctime>
 #include <random>
 #include <tuple>
+#include <vector>
+using namespace std;
 
-tuple firstMove(Board board);
-tuple secondMove(Board board);
-tuple randomMove(Board board);
+tuple<int, int> firstMove(Board board);
+tuple<int, int> secondMove(Board board);
+tuple<int, int> randomMove(Board board);
 
-int evalFunction(Board board, tuple position, bool mode);
-int evaluatePosition(Board board, tuple position);
-list<tuple> attackArea(tuple initPair, int connect);
+int evalFunction(Board board, tuple<int, int> position, bool mode);
+int evaluatePosition(Board board, tuple<int, int> position);
+vector<tuple<int, int>> attackArea(tuple<int, int> initPair, int connect);
 
-tuple topMoves(Board board, int limit);
-tuple evaluationFunction(Board board);
+tuple<int, tuple<int, int>> topMoves(Board board, int limit);
+tuple<int, tuple<int, int>> evaluationFunction(Board board);
 
 #endif
