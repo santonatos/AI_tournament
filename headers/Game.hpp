@@ -21,7 +21,7 @@ class Game {
 
 		int store_move(string move_from_read);
 		int make_move(int col, int row,char color);
-		int make_first_move(int turn,string move);
+		int make_first_move(int turn, string move);
 		int make_next_move();
 		//int make_move();
 	//private:

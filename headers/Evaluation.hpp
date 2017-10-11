@@ -2,10 +2,11 @@
 #define EVALUATION_HPP
 
 #include <queue>
-#include <ctime>
 #include <random>
 #include <tuple>
 #include <vector>
+#include <algorithm>
+#include "Board.hpp"
 using namespace std;
 
 tuple<int, int> firstMove(Board board);

@@ -1,11 +1,6 @@
-//Based on the theory described here: http://www.renju.nu/wp-content/uploads/sites/46/2016/09/Go-Moku.pdf
-#include <queue>
-#include <ctime>
-#include <random>
-#include <tuple>
-#include <vector>
-#include "../Board.cpp"
-#include "../headers/Evaluation.hpp"
+// Based on the theory described here: http://www.renju.nu/wp-content/uploads/sites/46/2016/09/Go-Moku.pdf
+#include "headers/Board.hpp"
+#include "headers/Evaluation.hpp"
 using namespace std;
 
 tuple<int, int> firstMove(Board board){
@@ -25,17 +20,13 @@ tuple<int, int> secondMove(Board board){
     @param:     board   The playing board.
     @returns:   A tuple containing the coordinates of the move.
     */
-    // Get position of first tile
-    int y1 = board.black[0][0];
-    int x1 = board.black[0][1];
-    int y2 = 0;
-    int x2 = 0;
 
-    if (y1 <= board.size / 2) {
-        y2 = 1;
-    } else {
-        y2 = -1;
-    }
+    // Get position of first tile
+    tuple<int, int> opponent_moves = board.get_opponent_move_list().front();
+    int x1 = get<0>(opponent_moves);
+    int y1 = get<1>(opponent_moves);
+    int x2 = 0;
+    int y2 = 0;
 
     if (x1 <= board.size / 2) {
         x2 = 1;
@@ -43,7 +34,13 @@ tuple<int, int> secondMove(Board board){
         x2 = -1;
     }
 
-    return make_tuple(y1 + y2, x1 + x2);
+    if (y1 <= board.size / 2) {
+        y2 = 1;
+    } else {
+        y2 = -1;
+    }
+
+    return make_tuple(x1 + x2, y1 + y2);
 }
 
 tuple<int, int> randomMove(Board board) {
@@ -55,13 +52,15 @@ tuple<int, int> randomMove(Board board) {
     bool go = true;
     int y = 0;
     int x = 0;
+    tuple<int, int> move;
 
     while (go) {
         x = rand() % (board.size - 1);
         y = rand() % (board.size - 1);
-        go = !board.validMove((y, x));
+        move = make_tuple(x, y);
+        go = !board.valid_move(move);
     }
-    return make_tuple(x, y);
+    return move;
 }
 
 int evalFunction(Board board, tuple<int, int> position, bool mode) {
@@ -82,12 +81,12 @@ int evalFunction(Board board, tuple<int, int> position, bool mode) {
     //int y0 = position[1];
     int x0 = get<0>(position);
     int y0 = get<1>(position);
-    int evalution = 0;
+    int evaluation = 0;
     vector<tuple<int, int>> opts = {make_tuple(1, 0), make_tuple(0, 1), make_tuple(1, 1), make_tuple(1, -1)};
 
     // Determine how we're weighing the evaluation (for attack or defend)
 
-    string color = board.our_color;
+    string color = board.get_our_color();
     string not_color;
     if (color == "white") {
         not_color = "Black";
@@ -102,11 +101,10 @@ int evalFunction(Board board, tuple<int, int> position, bool mode) {
         int x1 = get<0>(pair);
         int y1 = get<1>(pair);
         
-        int evaluation = 0;
         vector<string> pathlist = {"."};
 
-
-        for (int j : array<int, 2> = {1, -1}) {
+        array<int, 2> modifier = {1, -1};
+        for (int j : modifier) {
             for (int i = 1; i <= board.connect; i++) {
 
                 // Determine new coordinates to check for potential impact on position's value
@@ -114,30 +112,33 @@ int evalFunction(Board board, tuple<int, int> position, bool mode) {
                 int x2 = x0 + x1 * i * j;
                 int x_ol = x2 + x1 * j;
                 int y_ol = y2 + y1 * j;
+                tuple<int, int> x2y2 = make_tuple(x2, y2);
+                tuple<int, int> xy_ol = make_tuple(x_ol, y_ol);
 
                 // Check if the projected position is not on the board, is already taken by the opponent,
                 //  or if move would form an overline. If yes, then break. Otherwise, check to see
                 //  where the move is added to the list of paths
-                if(!board.cell_exists(x2, y2) || board.get_cell(x2, y2).color == not_color)
-                    || (i + 1 == board.connect && board.cell_exists(x_ol, y_ol)
-                    && board.get_cell(x_ol, y_ol).color == color) {
+                if((!board.cell_exists(x2y2) || board.get_cell_color(x2y2) == not_color) \
+                    || (i + 1 == board.connect && board.cell_exists(xy_ol) \
+                    && board.get_cell_color(xy_ol) == color)) {
                         break;
                     } else if (j > 0) { // Insert at back of list if right of position
-                        pathlist.push_back(board.get_cell(x2, y2).color);
+                        pathlist.push_back(board.get_cell_color(x2y2));
                     } else if (j < 0) { // Insert at front of list if left of position
-                        pathlist.insert(0, board.get_cell(x2, y2).color);
+                        pathlist.insert(pathlist.begin(), board.get_cell_color(x2y2));
                     }
 
                 // Determine the number of connections that can be formed at the given position
                 int paths_num = pathlist.size() - board.connect + 1;
                 int consec = 0;
+
                 // Determine the total consecutive score for the given position
                 if (paths_num > 0) {
                     for (int i = 0; i <= paths_num; i++) {
                         if (mode) {
-                            consec = pathlist[i:i + board.connect].count(color);
+                            consec = count(&pathlist[i], &pathlist[i+board.connect], color);
                         } else {
-                            consec = pathlist[i:i + board.connect].count(not_color);
+                            consec = count(&pathlist[i], &pathlist[i+board.connect], not_color);
                         }
 
                         if (consec != board.connect - 1) {
@@ -173,7 +174,7 @@ int evaluatePosition(Board board, tuple<int, int> position) {
     int x = get<0>(position);
     int y = get<1>(position);
 
-    if (board.cell_exists(x, y)) {
+    if (board.cell_exists(make_tuple(x, y))) {
         int result = evalFunction(board, position, true) + evalFunction(board, position, false);
         return result;
     } else {
@@ -190,19 +191,20 @@ vector<tuple<int, int>> attackArea(tuple<int, int> initPair, int connect) {
     @returns:   A list containing coordinates of connect spaces.
     */
     vector<tuple<int, int>> area;
-    tuple<int, int> opts = make_tuple(make_tuple(1, 0), make_tuple(0, 1), make_tuple(1, 1), make_tuple(1, -1));
+    vector<tuple<int, int>> opts = {make_tuple(1, 0), make_tuple(0, 1), make_tuple(1, 1), make_tuple(1, -1)};
 
     int x = get<0>(initPair);
     int y = get<1>(initPair);
 
     for (tuple<int, int> pair : opts) {
-        int x1 = get<0>(Pair);
-        int y1 = get<1>(Pair);
+        int x1 = get<0>(pair);
+        int y1 = get<1>(pair);
 
-        for (int j : make_tuple(1, -1)) {
+        array<int, 2> modifier = {1, -1};
+        for (int j : modifier) {
             for (int i = 1; i <= connect; i++){
-                int x2 = x + x1 * i * s;
-                int y2 = y + y1 * i * s;
+                int x2 = x + x1 * i * j;
+                int y2 = y + y1 * i * j;
                 area.push_back(make_tuple(x2, y2));
             }
 
@@ -219,15 +221,22 @@ tuple<int, tuple<int, int>> topMoves(Board board, int limit) {
     @returns:   A map of the top moves available along with their values as the key.
     */
 
-    vector<tuple> spots;
-    vector<tuple> topList;
-    priority_queue<int, tuple<int, int>> topQueue;
+    vector<tuple<int, int>> spots;
+    vector<tuple<int, tuple<int, int>>> topList;
+
+    // Using lambda to compare elements.
+    auto cmp = [](const tuple<int, tuple<int, int>>& left, const tuple<int, tuple<int, int>>& right) {
+        return get<0>(left) < get<0>(right);
+    };
+    priority_queue<tuple<int, tuple<int, int>>, vector<tuple<int, tuple<int, int>>>, decltype(cmp)> topQueue(cmp);
 
     // 
     board.print_board();
 
+    vector<tuple<int, int>> filled_spaces = board.get_filled_spaces();
+
     // For each piece on the board
-    for (tuple<int, int> n : board.get_filled_coordinates()) {
+    for (tuple<int, int> n : filled_spaces) {
 
         // For each potential connect space within range
         for (tuple<int, int> m : attackArea(n, board.connect)) {
@@ -236,7 +245,8 @@ tuple<int, tuple<int, int>> topMoves(Board board, int limit) {
             int y = get<1>(m);
 
             // If the connect space is on the board, add to list of potential spots
-            if (board.cell_exists(x, y) && !board.get_filled_coordinates().find(m)) {
+            if (board.cell_exists(make_tuple(x, y)) && \
+                find(filled_spaces.begin(), filled_spaces.end(), m) == filled_spaces.end()) {
                 spots.push_back(m);
             }
         }
@@ -244,11 +254,12 @@ tuple<int, tuple<int, int>> topMoves(Board board, int limit) {
 
     // Evaluate potential of each spot, and add to queue
     for (tuple<int, int> p : spots) {
-        topQueue.push(evaluatePosition(board, p) * (-1), p);
+        topQueue.push(make_tuple(evaluatePosition(board, p) * (-1), p));
     }
 
     for (int z = 0; z <= limit; z++) {
-        topList.push_back(topQueue.pop());
+        topList.push_back(topQueue.top());
+        topQueue.pop();
     }
 
     return topList.front();

@@ -105,3 +105,35 @@ int Board::check_free_cell(int column_index,int row_index){
 
 
 
+// List (vector) of opponent's moves, in order of first to last
+vector<tuple<int, int>> Board::get_opponent_move_list(){
+	vector<tuple<int, int>> temp = {make_tuple(0, 0)};
+	return temp;	
+}
+
+// Get our team's color
+string Board::get_our_color() {
+	return "";
+}
+
+// Checks if move is valid
+bool Board::valid_move(tuple<int, int> move) {
+	return false;
+}
+
+
+// Checks if cell is within the board
+bool Board::cell_exists(tuple<int, int> cell) {
+	return false;
+}
+
+// Gets color of cell
+string Board::get_cell_color(tuple<int, int> cell) {
+	return "Function not written yet.";
+}
+
+// Gets list (vector) of filled spaces on the board
+vector<tuple<int, int>> Board::get_filled_spaces() {
+	vector<tuple<int, int>> temp = {make_tuple(0, 0)};
+	return temp;
+}
