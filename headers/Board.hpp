@@ -7,6 +7,9 @@
 #include <map>
 #include <vector>
 #include <tuple>
+#include <string>
+#include <string.h>
+using namespace std;
 
 class Board {
 
@@ -17,6 +20,9 @@ class Board {
 		const int connect = 5;
 		int turns;
 		char board[15][15];
+		string our_color = string("");
+		char our_color_char = 'n';
+		vector<std::tuple<int, int>> opponent_moves;
 
 		Board();
 		int make_move(int column_index,int row_index,char color);
@@ -33,6 +39,8 @@ class Board {
 		std::string get_cell_color(std::tuple<int, int> cell);
 		// Gets list (vector) of filled spaces on the board
 		std::vector<std::tuple<int, int>> get_filled_spaces();
+		int check_valid_position(int column_index,int row_index);
+		int check_free_cell(int column_index,int row_index);
 
 
 	private:
@@ -41,8 +49,7 @@ class Board {
 		const char colors[4] = "ewb";
 
 		int check_valid_color(char color);
-		int check_valid_position(int column_index,int row_index);
-		int check_free_cell(int column_index,int row_index);
+
 			
 };
 

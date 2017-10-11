@@ -58,7 +58,7 @@ int write_file(string groupname,string column,string row){
 	  else cout << "Unable to open file";
 	  return 0;
   }else{
-	  cout << "movefile does not exist, cannot write on it" << endl;
+	  cout << "[WARNING] movefile does not exist, cannot write on it" << endl;
 	  return -1;
 
   }

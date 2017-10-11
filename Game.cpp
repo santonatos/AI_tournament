@@ -2,7 +2,11 @@
 #include <stdlib.h>
 #include <iostream>
 #include <string>
+#include <tuple>
 #include "headers/Game.hpp"
+#include "headers/FileIO.hpp"
+#include "headers/Evaluation.hpp"
+#include <sstream>
 
 using namespace std;
 
@@ -48,7 +52,7 @@ int Game::make_first_move(int turn,string move){
 		if(Game::gameBoard.board[7][7] == Game::opponent_color){
 			Game::store_move(move);
 			Game::gameBoard.make_move(7,7,Game::our_color);
-			//TODO write file
+			write_file("agentSmurf","G","7");
 		}else{
 			Game::make_next_move();
 		}	
@@ -66,10 +70,20 @@ int Game::make_move(int col, int row,char color){
 }
 
 int Game::make_next_move(){
+stringstream ss;
 	//TODO
 	//next_move = gomoku.eval(gomoku.board)
-	//gomoku.make_move(col,r,Game::gameBoard.our_color);
-	//write_file();
+	tuple<int, tuple<int, int>> next_move  = evaluationFunction(this->gameBoard);
+	auto move_tuple = get<1>(next_move);
+	int c = get<0>(move_tuple);
+	int r = get<1>(move_tuple);
+	char col = this->columns[c -1];
+	string column;
+ss << col;
+ss >> column;
+	string r1 = to_string(r);
+	this->make_move(c,r,Game::gameBoard.our_color_char);
+	write_file(string("agentSmurf"),column,r1);
 	return 0;
 
 

@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <iostream>
 #include <string>
+#include <vector>
+#include <tuple>
+#include <functional>
 #include "headers/Board.hpp"
 using namespace std;
 
@@ -17,6 +20,63 @@ Board::Board(void){
 
 	}
 }
+string Board::get_our_color(){
+
+	return this->our_color;
+
+}
+
+vector<std::tuple<int, int>> Board::get_opponent_move_list(){
+	return this->opponent_moves;
+
+
+}
+
+bool Board::valid_move(std::tuple<int, int> move){
+
+	int r = this->check_free_cell(get<0>(move),get<1>(move));
+	if(r == 1)return true;
+	else return false;
+}
+
+bool Board::cell_exists(std::tuple<int, int> cell){
+	int r = this->check_valid_position(get<0>(cell),get<1>(cell));
+	if(r == 1)return true;
+	else return false;	
+
+
+}
+
+string Board::get_cell_color(std::tuple<int, int> cell){
+	int c = get<0>(cell);
+	int r = get<1>(cell);
+	if(board[c][r] == 'w'){
+		return string("white");
+	}else if(board[c][r] == 'b'){
+		return string("black");
+	}else{
+		return string("empty");
+	}
+	return string("empty");
+
+}
+vector<std::tuple<int, int>> Board::get_filled_spaces(){
+	vector<std::tuple<int, int>> myv;
+	for(int i = 0;i < this->width;i++){
+		for(int j = 0;j < this->height;j++){
+			if (this->board[i][j] != 'e'){
+		auto new_tuple = std::make_tuple (i+1,j+1);
+		myv.push_back(new_tuple);
+
+			}
+		}
+	}
+	return myv;
+
+
+
+
+}
 /*
 takes arguments from 1 to 15, not 0 to 14
 */
@@ -31,6 +91,12 @@ int Board::make_move(int column_index,int row_index,char color){
 		fprintf(stdout,"[WARNING] this cell is already filled, but will be overwritten\n");
 	} 
 	board[column_index-1][row_index-1] = color;
+
+	if(board[column_index-1][row_index-1] != 'e' && board[column_index-1][row_index-1] != this->our_color_char){
+		auto new_tuple = std::make_tuple (column_index,row_index);
+		this->opponent_moves.push_back(new_tuple);
+	}
+
 	return 1;
 }
 
@@ -91,10 +157,11 @@ int Board::check_valid_position(int column_index,int row_index){
 
 int Board::check_free_cell(int column_index,int row_index){
 	if(!Board::check_valid_position(column_index,row_index)){
+		cout << "[WARNING] out of board " << endl;
 		return 0;
 	}
-	if(this->board[column_index][row_index] != 'e'){
-		cout << "[WARNING] this cell is occupied by color: " << this->board[column_index][row_index] << endl;
+	if(this->board[column_index - 1][row_index -1] != 'e'){
+		cout << "[WARNING] this cell is occupied by color: " << this->board[column_index-1][row_index-1] << endl;
 		return 0;
 	}
 	return 1;
@@ -105,7 +172,7 @@ int Board::check_free_cell(int column_index,int row_index){
 
 
 
-// List (vector) of opponent's moves, in order of first to last
+/*// List (vector) of opponent's moves, in order of first to last
 vector<tuple<int, int>> Board::get_opponent_move_list(){
 	vector<tuple<int, int>> temp = {make_tuple(0, 0)};
 	return temp;	
@@ -136,4 +203,4 @@ string Board::get_cell_color(tuple<int, int> cell) {
 vector<tuple<int, int>> Board::get_filled_spaces() {
 	vector<tuple<int, int>> temp = {make_tuple(0, 0)};
 	return temp;
-}
+}*/
